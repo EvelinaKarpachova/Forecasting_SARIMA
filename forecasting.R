@@ -161,7 +161,7 @@ ui <- navbarPage(
 
 
 
-###################      Servera funkcija    ################################
+#############################      Servera funkcija    ################################
 server <- function(input, output) {
   
   data <- reactive({
@@ -178,7 +178,8 @@ server <- function(input, output) {
     
     # Datus konvertē laikrindā
     ts_data <- ts(data, frequency = input$frequency, start = input$start)
-    return(ts_data)})
+    return(ts_data)
+    })
   
 
     # Pārbaude vai ir datu trūkums, ja ir, aizpilda tukšumus, pielietojot lineāro interpolāciju
@@ -195,7 +196,8 @@ server <- function(input, output) {
       output$datu_trukums_izvade <- renderText({"Trūkstoši dati ir aizpildīti."})
       } else {
       output$datu_trukums_izvade <- renderText({"Datu trūkums nav novērots."})
-      return(data)}})
+      return(data)}
+     })
 
     
     # Laikrindas treniņa kopa un testa kopa
@@ -232,7 +234,8 @@ server <- function(input, output) {
     # Laikrindas dekompozīcija
     decompose_ts <- reactive({
       req(input$decompose_Poga)
-      decompose(trenina_ts())})
+      decompose(trenina_ts())
+    })
     
     
     # Laikrindas stacionārizēšana
@@ -242,7 +245,6 @@ server <- function(input, output) {
       if (is.null(input$stac_Transformacija)) {
         return(NULL)  # Return NULL or handle the case when no selection is made
       }
-      
       if (input$stac_Transformacija == "diff") {
         # Diferencēšana
         diff(trenina_ts())
@@ -275,7 +277,8 @@ server <- function(input, output) {
         auto.arima(stacionara_ts())
       }, error = function(e) {
         return(NULL)
-      })})
+      })
+    })
   
     
     # Modeļa atlikumu diagnostika
@@ -284,7 +287,8 @@ server <- function(input, output) {
         checkresiduals(sarima_modelis())
       }, error = function(e) {
         return(NULL)
-      })})
+      })
+     })
     
     
     # Prognoze
@@ -321,7 +325,8 @@ server <- function(input, output) {
       seasonal_order <- pmax(c(input$P, input$D, input$Q), 0)
       
       list(order = order, seasonal_order = seasonal_order, h = input$h
-      )})
+      )
+    })
   
     
     # Prognozēšana ar izvēlētiem parametriem
@@ -340,7 +345,8 @@ server <- function(input, output) {
     output$tsPlot <- renderPlot({
     req(data())
     plot(data(), lwd = 1.5, main = "Laikrindas grafiks", xlab = "Laiks", ylab = "Vērtība")
-    points(data(), col = "blue")})
+    points(data(), col = "blue")
+    })
     
   # Laikrindas dati
     output$ts_dati <- renderPrint({
@@ -350,7 +356,8 @@ server <- function(input, output) {
   # Grafiks pēc trūkumu aizpildes
     output$interpolated_plot <- renderPlot({
       plot(trukumi_ts(), main = "Pilna laikrinda", lwd = 1.5, xlab = "Laiks", ylab = "Vertība")
-      points(trukumi_ts(), col = "darkgreen")})
+      points(trukumi_ts(), col = "darkgreen")
+    })
     
   # Laikrindas statistiku izvade
     output$ts_summary <- renderTable({
@@ -364,7 +371,8 @@ server <- function(input, output) {
     ts_info <- data.frame(
         Statistika = c("Min", "Max", "Mediāna", "Aritmētiskais vidējais"),
         Vērtība = c(min(data()), max(data()), median(data()), mean(data())))
-        ts_info}})
+        ts_info}
+    })
     
     
     
@@ -375,17 +383,20 @@ server <- function(input, output) {
       output$sadale_rezultats <- renderText({
         print(" Laikrinda tika sadalīta treniņa kopā un testa kopā (80% un 20%).
               Turpmākās darbības tiks veiktas, izmantojot treniņa kopu.\n")
-      })})
+      })
+    })
     
   # Laikrindas dekompozīcijas grafiks
     output$dekompozicijaPlot <- renderPlot({
     req(input$decompose_Poga)
-    plot(decompose_ts())})  
+    plot(decompose_ts())
+    })  
     
   # Stacionāras laikrindas grafiks
     output$stacionara_ts_Plot <- renderPlot({
     req(input$stac_plot_Poga)
-    plot(stacionara_ts(), main = "Stacionarizēta laikrinda", xlab = "Laiks", ylab = "Transformētās vērtības")})
+    plot(stacionara_ts(), main = "Stacionarizēta laikrinda", xlab = "Laiks", ylab = "Transformētās vērtības")
+    })
     
    # Stacionaritātes pārbaude
     output$stac_rezultats <- renderTable({
@@ -409,7 +420,8 @@ server <- function(input, output) {
       capture.output(print(sarima_modelis()), file = NULL, append = TRUE)
     } else {
       return("Error: Nevar atrast piemēroto SARIMA modeli. Pārbaudiet ievades.")
-    }})
+    }
+    })
     
     # Atlikumu grafiks
     output$atlikumuPlot <- renderPlot({
@@ -418,7 +430,8 @@ server <- function(input, output) {
         capture.output(print(sarima_atlikumi()), file = NULL, append = TRUE)
       } else {
         return("Error: Nav iespējams veikt atlikumu diagnostiku.")
-      }})
+      }
+    })
     
     # Boksa-Ljunga tests
     output$BL_test_summary <- renderPrint({
@@ -427,7 +440,8 @@ server <- function(input, output) {
         capture.output(print(sarima_atlikumi()), file = NULL, append = TRUE)
       } else {
         return("Error: Nav iespējams veikt atlikumu diagnostiku.")
-      }})
+      }
+    })
     
     # Boksa-Ļjunga testa interpretācija
     output$interpretacija <- renderTable({
@@ -454,7 +468,8 @@ server <- function(input, output) {
       } else {
       plot(prognoze_ts(), lwd = 1.5, xlab = "Laiks", ylab = "Vērtības", main = "Prognoze")
       points(data(), col = "blue")
-      }})
+      }
+    })
     
     # Prognozes vērtības
     output$prognozes_vertibas <- renderPrint({
@@ -501,8 +516,9 @@ server <- function(input, output) {
       # Kritēriju tabula
       data.frame(AIC = modelis$aic,
                  BIC = modelis$bic,
-                 AICC = modelis$aicc)})
-    
+                 AICC = modelis$aicc)
+    })
+
     # Lejupielādēšanas iespēja
     output$download_results <- downloadHandler(
       filename = function() {
@@ -512,8 +528,7 @@ server <- function(input, output) {
         download_data <- prognoze_ts()$mean
         # Veido CSV failu
         write.csv(download_data, file, row.names = FALSE)
-      }
-    )
+      })
     
     
     
@@ -544,7 +559,8 @@ server <- function(input, output) {
         plot(forecast_result, main = "SARIMA prognoze", lwd=1.5, 
              xlab = "Laiks", ylab = "Vērtības")
         points(data(), col = "blue")
-        }})
+        }
+    })
     
     # Paziņojums
     output$pazinojums_3 <- renderText({
@@ -571,7 +587,8 @@ server <- function(input, output) {
       # Kritēriju tabula
       data.frame(AIC = modelis$aic,
                    BIC = modelis$bic,
-                   AICC = modelis$aicc)})
+                   AICC = modelis$aicc)
+    })
     
     # Paziņojums
     output$pazinojums_4 <- renderText({
@@ -605,8 +622,7 @@ server <- function(input, output) {
         download_data <- forecast_result$mean
         # Veido CSV failu
         write.csv(download_data, file, row.names = FALSE)
-      }
-    )
+      })
     
     
     
